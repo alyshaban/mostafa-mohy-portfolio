@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { Post } from "@/types";
 import styles from "./AdminForms.module.css";
 import { useToast } from "@/components/ui/ToastProvider";
 import ImageInput from "./ImageInput";
-import { removeStorageImage } from "@/lib/storage";
+import { savePostAction } from "@/app/actions";
 
 export default function PostForm({ initialPost }: { initialPost?: Post }) {
   const [post, setPost] = useState<Partial<Post>>(
@@ -26,32 +25,21 @@ export default function PostForm({ initialPost }: { initialPost?: Post }) {
   const { showToast } = useToast();
   const router = useRouter();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const result = await savePostAction({
+        ...post,
+        id: initialPost?.id,
+      });
+      if (result.error) throw new Error(result.error);
+
       if (initialPost?.id) {
-        const { error } = await supabase
-          .from("posts")
-          .update(post)
-          .eq("id", initialPost.id);
-        if (error) throw error;
-        if (
-          initialPost.cover_storage_path &&
-          initialPost.cover_storage_path !== post.cover_storage_path
-        ) {
-          await removeStorageImage(supabase, initialPost.cover_storage_path);
-        }
+        if (result.data) setPost(result.data);
         showToast({ title: "تم تعديل البوست", type: "success" });
       } else {
-        const { error } = await supabase.from("posts").insert([post]);
-        if (error) throw error;
         showToast({ title: "تمت إضافة البوست", type: "success" });
         router.push("/admin/posts");
         router.refresh();

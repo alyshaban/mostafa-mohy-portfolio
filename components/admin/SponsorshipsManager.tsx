@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { Sponsorship } from "@/types";
 import Image from "next/image";
 import styles from "./AdminForms.module.css";
@@ -9,8 +8,12 @@ import { Pencil, Trash2, Plus, GripVertical } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
 import ImageInput from "./ImageInput";
-import { removeStorageImage } from "@/lib/storage";
 import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
+import {
+  deleteSponsorshipAction,
+  saveSponsorshipAction,
+  toggleSponsorshipPublishAction,
+} from "@/app/actions";
 
 export default function SponsorshipsManager({
   initialSponsorships,
@@ -35,51 +38,36 @@ export default function SponsorshipsManager({
   const { showToast } = useToast();
   const { confirm } = useDialog();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (currentSponsorship.id) {
-        const previous = sponsorships.find((s) => s.id === currentSponsorship.id);
-        const { error } = await supabase
-          .from("sponsorships")
-          .update(currentSponsorship)
-          .eq("id", currentSponsorship.id);
-        if (error) throw error;
+        const result = await saveSponsorshipAction(currentSponsorship);
+        if (result.error) throw new Error(result.error);
+        if (!result.data) throw new Error("لم يتم حفظ الإعلان");
 
         setSponsorships((prev) =>
           prev.map((s) =>
             s.id === currentSponsorship.id
-              ? ({ ...s, ...currentSponsorship } as Sponsorship)
+              ? result.data!
               : s,
           ),
         );
-        if (
-          previous?.image_storage_path &&
-          previous.image_storage_path !== currentSponsorship.image_storage_path
-        ) {
-          await removeStorageImage(supabase, previous.image_storage_path);
-        }
         showToast({ title: "تم تعديل الإعلان", type: "success" });
       } else {
         const newOrder =
           sponsorships.length > 0
             ? Math.max(...sponsorships.map((s) => s.display_order)) + 1
             : 0;
-        const { data, error } = await supabase
-          .from("sponsorships")
-          .insert([{ ...currentSponsorship, display_order: newOrder }])
-          .select()
-          .single();
-        if (error) throw error;
+        const result = await saveSponsorshipAction({
+          ...currentSponsorship,
+          display_order: newOrder,
+        });
+        if (result.error) throw new Error(result.error);
 
-        if (data) setSponsorships([...sponsorships, data as Sponsorship]);
+        if (result.data) setSponsorships([...sponsorships, result.data]);
         showToast({ title: "تمت إضافة الإعلان", type: "success" });
       }
       setIsEditing(false);
@@ -97,7 +85,6 @@ export default function SponsorshipsManager({
   };
 
   const handleDelete = async (id: string) => {
-    const sponsorship = sponsorships.find((s) => s.id === id);
     const confirmed = await confirm({
       title: "حذف الإعلان؟",
       description: "سيتم حذف الإعلان أو الرعاية من لوحة التحكم والموقع.",
@@ -107,20 +94,13 @@ export default function SponsorshipsManager({
     if (!confirmed) return;
 
     try {
-      const { error } = await supabase
-        .from("sponsorships")
-        .delete()
-        .eq("id", id);
-      if (error) throw error;
+      const result = await deleteSponsorshipAction(id);
+      if (result.error) throw new Error(result.error);
       setSponsorships((prev) => prev.filter((s) => s.id !== id));
-      const storageError = await removeStorageImage(
-        supabase,
-        sponsorship?.image_storage_path,
-      );
       showToast({
         title: "تم حذف الإعلان",
-        description: storageError ? "لكن تعذر حذف ملف الصورة من Storage." : undefined,
-        type: storageError ? "warning" : "success",
+        description: result.data?.storageWarning ? "لكن تعذر حذف ملف الصورة من Storage." : undefined,
+        type: result.data?.storageWarning ? "warning" : "success",
       });
     } catch (error) {
       console.error(error);
@@ -134,11 +114,8 @@ export default function SponsorshipsManager({
 
   const handleTogglePublish = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from("sponsorships")
-        .update({ is_published: !currentStatus })
-        .eq("id", id);
-      if (error) throw error;
+      const result = await toggleSponsorshipPublishAction(id, currentStatus);
+      if (result.error) throw new Error(result.error);
       setSponsorships((prev) =>
         prev.map((s) =>
           s.id === id ? { ...s, is_published: !currentStatus } : s,

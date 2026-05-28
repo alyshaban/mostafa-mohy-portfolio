@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { Profile } from "@/types";
 import styles from "./AdminForms.module.css";
 import { useToast } from "@/components/ui/ToastProvider";
 import ImageInput from "./ImageInput";
-import { removeStorageImage } from "@/lib/storage";
+import { saveProfileAction } from "@/app/actions";
 
 export default function ProfileForm({ initialProfile }: { initialProfile: Profile | null }) {
   const [profile, setProfile] = useState<Partial<Profile>>(initialProfile || {
@@ -26,73 +25,18 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (initialProfile?.id) {
-        const { error } = await supabase
-          .from("profile")
-          .update({
-            name: profile.name,
-            bio: profile.bio,
-            avatar_url: profile.avatar_url,
-            avatar_storage_path: profile.avatar_storage_path,
-            cover_url: profile.cover_url,
-            cover_storage_path: profile.cover_storage_path,
-            followers_count: profile.followers_count,
-            views_count: profile.views_count,
-            likes_count: profile.likes_count,
-            videos_count: profile.videos_count,
-            ads_description: profile.ads_description,
-            ads_contact_url: profile.ads_contact_url,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", initialProfile.id);
-
-        if (error) throw error;
-        if (
-          initialProfile.avatar_storage_path &&
-          initialProfile.avatar_storage_path !== profile.avatar_storage_path
-        ) {
-          await removeStorageImage(supabase, initialProfile.avatar_storage_path);
-        }
-        if (
-          initialProfile.cover_storage_path &&
-          initialProfile.cover_storage_path !== profile.cover_storage_path
-        ) {
-          await removeStorageImage(supabase, initialProfile.cover_storage_path);
-        }
-        showToast({ title: "تم تحديث الملف الشخصي", type: "success" });
-      } else {
-        const { error } = await supabase
-          .from("profile")
-          .insert([
-            {
-              name: profile.name,
-              bio: profile.bio,
-              avatar_url: profile.avatar_url,
-              avatar_storage_path: profile.avatar_storage_path,
-              cover_url: profile.cover_url,
-              cover_storage_path: profile.cover_storage_path,
-              followers_count: profile.followers_count,
-              views_count: profile.views_count,
-              likes_count: profile.likes_count,
-              videos_count: profile.videos_count,
-              ads_description: profile.ads_description,
-              ads_contact_url: profile.ads_contact_url,
-            }
-          ]);
-
-        if (error) throw error;
-        showToast({ title: "تم إنشاء الملف الشخصي", type: "success" });
-      }
+      const result = await saveProfileAction(profile);
+      if (result.error) throw new Error(result.error);
+      if (result.data) setProfile(result.data);
+      showToast({
+        title: profile.id ? "تم تحديث الملف الشخصي" : "تم إنشاء الملف الشخصي",
+        type: "success",
+      });
     } catch (err) {
       showToast({
         title: "تعذر حفظ الملف الشخصي",

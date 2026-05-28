@@ -14,8 +14,32 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "مصطفى محي | Mostafa Mohy",
+  metadataBase: new URL("https://mostafamohy.vercel.app"),
+  title: {
+    default: "مصطفى محي | Mostafa Mohy",
+    template: "%s | مصطفى محي",
+  },
   description: "صانع محتوى متنوع على فيسبوك | شارك معي لحظات الحياة اليومية والترفيه",
+  openGraph: {
+    type: "website",
+    locale: "ar_EG",
+    url: "https://mostafamohy.vercel.app",
+    siteName: "Mostafa Mohy - مصطفى محي",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

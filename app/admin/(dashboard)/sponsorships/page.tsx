@@ -1,23 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import SponsorshipsManager from "@/components/admin/SponsorshipsManager";
 
-export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export default async function SponsorshipsAdminPage() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
+  const supabase = createClient();
   const { data: sponsorships } = await supabase
     .from("sponsorships")
     .select("*")

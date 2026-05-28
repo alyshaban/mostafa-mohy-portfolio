@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import styles from "./ContactSection.module.css";
 import { Send } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
+import { submitContactMessageAction } from "@/app/actions";
 
 export default function ContactSection() {
   const [name, setName] = useState("");
@@ -14,24 +14,17 @@ export default function ContactSection() {
   const [status, setStatus] = useState({ text: "", type: "" });
   const { showToast } = useToast();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ text: "", type: "" });
 
-    const { error } = await supabase
-      .from("contacts")
-      .insert([{ name, email, message }]);
+    const result = await submitContactMessageAction({ name, email, message });
 
-    if (error) {
+    if (result.error) {
       showToast({
         title: "تعذر إرسال الرسالة",
-        description: "حدث خطأ أثناء إرسال الرسالة، حاول مرة أخرى.",
+        description: result.error,
         type: "error",
       });
       setStatus({

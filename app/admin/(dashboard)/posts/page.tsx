@@ -1,23 +1,12 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import PostsList from "@/components/admin/PostsList";
 
-export default async function AdminPostsPage() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+export const dynamic = "force-dynamic";
 
+export default async function AdminPostsPage() {
+  const supabase = createClient();
   const { data } = await supabase.from("posts").select("*").order("created_at", { ascending: false });
 
   return (

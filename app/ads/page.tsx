@@ -1,34 +1,17 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import Image from "next/image";
 import styles from "./AdsPage.module.css";
 import { Play, Megaphone, Send } from "lucide-react";
+import { getProfile, getSponsorships } from "@/lib/data/public";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function AdsPage() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
-  const [
-    { data: profile },
-    { data: sponsorships }
-  ] = await Promise.all([
-    supabase.from("profile").select("*").maybeSingle(),
-    supabase.from("sponsorships").select("*").order("display_order", { ascending: true }),
+  const [profile, sponsorships] = await Promise.all([
+    getProfile(),
+    getSponsorships(),
   ]);
 
-  const publishedAds = (sponsorships || []).filter(s => s.is_published);
+  const publishedAds = sponsorships.filter(s => s.is_published);
 
   return (
     <div className={styles.page}>

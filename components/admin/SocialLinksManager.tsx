@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { SocialLink } from "@/types";
 import styles from "./AdminForms.module.css";
 import listStyles from "./SocialLinksManager.module.css";
 import { Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
+import { deleteSocialLinkAction, saveSocialLinkAction } from "@/app/actions";
 
 const PLATFORMS = [
   "facebook",
@@ -43,11 +43,6 @@ export default function SocialLinksManager({ initialLinks }: { initialLinks: Soc
   const [displayOrder, setDisplayOrder] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const resetForm = () => {
     setEditingId(null);
     setPlatform("facebook");
@@ -75,9 +70,9 @@ export default function SocialLinksManager({ initialLinks }: { initialLinks: Soc
     if (!confirmed) return;
     
     setLoading(true);
-    const { error } = await supabase.from("social_links").delete().eq("id", id);
-    if (error) {
-      showToast({ title: "تعذر حذف الرابط", description: error.message, type: "error" });
+    const result = await deleteSocialLinkAction(id);
+    if (result.error) {
+      showToast({ title: "تعذر حذف الرابط", description: result.error, type: "error" });
     } else {
       setLinks(links.filter(l => l.id !== id));
       showToast({ title: "تم حذف الرابط", type: "success" });
@@ -90,26 +85,22 @@ export default function SocialLinksManager({ initialLinks }: { initialLinks: Soc
     setLoading(true);
 
     try {
-      if (editingId) {
-        const { data, error } = await supabase
-          .from("social_links")
-          .update({ platform, url, display_order: displayOrder, is_visible: isVisible })
-          .eq("id", editingId)
-          .select()
-          .single();
+      const result = await saveSocialLinkAction({
+        id: editingId || undefined,
+        platform,
+        url,
+        display_order: displayOrder,
+        is_visible: isVisible,
+      });
+      if (result.error) throw new Error(result.error);
+      if (!result.data) throw new Error("لم يتم حفظ الرابط");
 
-        if (error) throw error;
+      if (editingId) {
+        const data = result.data;
         setLinks(links.map(l => l.id === editingId ? data : l).sort((a,b) => a.display_order - b.display_order));
         showToast({ title: "تم تعديل الرابط", type: "success" });
       } else {
-        const { data, error } = await supabase
-          .from("social_links")
-          .insert([{ platform, url, display_order: displayOrder, is_visible: isVisible }])
-          .select()
-          .single();
-
-        if (error) throw error;
-        setLinks([...links, data].sort((a,b) => a.display_order - b.display_order));
+        setLinks([...links, result.data].sort((a,b) => a.display_order - b.display_order));
         showToast({ title: "تمت إضافة الرابط", type: "success" });
       }
       resetForm();

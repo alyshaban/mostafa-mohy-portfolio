@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { Profile } from "@/types";
 import styles from "./HeroSection.module.css";
-import { Users, Eye, Heart, Video } from "lucide-react";
+import { Users, Eye, Heart, Video, MessageCircle } from "lucide-react";
+import Link from "next/link";
 import { useImageViewer } from "@/components/ui/ImageViewerProvider";
 
 export default function HeroSection({ profile }: { profile: Profile | null }) {
@@ -56,6 +57,13 @@ export default function HeroSection({ profile }: { profile: Profile | null }) {
           </button>
           <h1 className={styles.name}>{p.name}</h1>
           <p className={styles.bio}>{p.bio}</p>
+
+          <div className={styles.ctaWrapper}>
+            <Link href="#contact" className={styles.ctaButton}>
+              <MessageCircle size={20} />
+              <span>تواصل معي</span>
+            </Link>
+          </div>
 
           <div className={styles.stats}>
             <div className={styles.statItem}>

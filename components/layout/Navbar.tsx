@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
@@ -8,6 +8,23 @@ import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (e.target instanceof HTMLElement) {
+        if (!e.target.closest(`.${styles.navbar}`)) {
+          setIsOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 

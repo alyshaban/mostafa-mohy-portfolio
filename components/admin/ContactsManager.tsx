@@ -1,26 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { ContactMessage } from "@/types";
 import { Trash2, CheckCircle } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
+import { deleteContactMessageAction, markContactReadAction } from "@/app/actions";
 
 export default function ContactsManager({ initialContacts }: { initialContacts: ContactMessage[] }) {
   const [contacts, setContacts] = useState<ContactMessage[]>(initialContacts);
   const { showToast } = useToast();
   const { confirm } = useDialog();
   
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const handleMarkAsRead = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase.from("contacts").update({ is_read: !currentStatus }).eq("id", id);
-    if (error) {
-      showToast({ title: "تعذر تحديث الرسالة", description: error.message, type: "error" });
+    const result = await markContactReadAction(id, currentStatus);
+    if (result.error) {
+      showToast({ title: "تعذر تحديث الرسالة", description: result.error, type: "error" });
     } else {
       setContacts(contacts.map(c => c.id === id ? { ...c, is_read: !currentStatus } : c));
       showToast({
@@ -38,9 +33,9 @@ export default function ContactsManager({ initialContacts }: { initialContacts: 
       tone: "danger",
     });
     if (!confirmed) return;
-    const { error } = await supabase.from("contacts").delete().eq("id", id);
-    if (error) {
-      showToast({ title: "تعذر حذف الرسالة", description: error.message, type: "error" });
+    const result = await deleteContactMessageAction(id);
+    if (result.error) {
+      showToast({ title: "تعذر حذف الرسالة", description: result.error, type: "error" });
     } else {
       setContacts(contacts.filter(c => c.id !== id));
       showToast({ title: "تم حذف الرسالة", type: "success" });

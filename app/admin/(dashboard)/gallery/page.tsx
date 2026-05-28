@@ -1,21 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import GalleryManager from "@/components/admin/GalleryManager";
 
-export default async function AdminGalleryPage() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+export const dynamic = "force-dynamic";
 
+export default async function AdminGalleryPage() {
+  const supabase = createClient();
   const { data } = await supabase.from("gallery").select("*").order("display_order", { ascending: true });
 
   return (

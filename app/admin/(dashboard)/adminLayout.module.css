@@ -1,0 +1,23 @@
+.adminContainer {
+  display: flex;
+  min-height: calc(100vh - var(--navbar-height));
+  padding-top: var(--navbar-height);
+  background-color: var(--bg-secondary);
+}
+
+.adminMain {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .adminContainer {
+    flex-direction: column;
+  }
+
+  .adminMain {
+    padding: 1rem;
+  }
+}

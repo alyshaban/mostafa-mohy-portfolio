@@ -1,0 +1,125 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background-color: color-mix(in srgb, var(--bg-card) 90%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 0.6rem 0;
+  transition: all 0.3s ease;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.logo span {
+  color: var(--accent);
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+}
+
+.links a {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.3s;
+  text-decoration: none;
+}
+
+.links a:hover {
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mobileMenuBtn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.mobileMenuBtn:hover {
+  background-color: var(--bg-secondary);
+}
+
+.mobileMenu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .links {
+    display: none;
+  }
+
+  .mobileMenuBtn {
+    display: flex;
+  }
+
+  .mobileMenu {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    z-index: 99;
+  }
+
+  .mobileMenu a {
+    padding: 1.2rem 2rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+  }
+
+  .mobileMenu a:last-child {
+    border-bottom: none;
+  }
+
+  .mobileMenu a:hover {
+    background-color: var(--bg-secondary);
+    color: var(--accent);
+  }
+}
+
+/* On Desktop hide the mobile button */
+@media (min-width: 769px) {
+  .mobileMenuBtn {
+    display: none;
+  }
+}

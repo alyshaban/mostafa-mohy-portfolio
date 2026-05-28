@@ -1,0 +1,126 @@
+.sidebar {
+  width: 280px;
+  background-color: var(--bg-card);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: var(--navbar-height);
+  height: calc(100vh - var(--navbar-height));
+  flex-shrink: 0;
+}
+
+.header {
+  padding: 2rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.header h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.nav {
+  flex: 1;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.3s;
+  min-height: 52px;
+}
+
+.navItem span {
+  line-height: 1.35;
+}
+
+.navItem:hover {
+  background-color: rgba(108, 99, 255, 0.05);
+  color: var(--accent);
+}
+
+.active {
+  background-color: rgba(108, 99, 255, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  color: var(--accent-2);
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.logoutBtn:hover {
+  background-color: rgba(255, 101, 132, 0.1);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 90;
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header {
+    display: none;
+  }
+
+  .nav {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  }
+
+  .navItem {
+    flex: 0 0 auto;
+    min-width: 76px;
+    min-height: 64px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.78rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .navItem svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .footer {
+    display: none;
+  }
+}

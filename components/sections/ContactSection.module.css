@@ -1,0 +1,122 @@
+.section {
+  padding: 4rem 0 8rem;
+  background-color: var(--bg-secondary);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 3rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.submitBtn {
+  background: var(--accent);
+  color: white;
+  padding: 1.2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  transition: all 0.3s;
+  margin-top: 1rem;
+  box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2);
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 25px rgba(108, 99, 255, 0.3);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.statusMessage {
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.success {
+  background: rgba(37, 211, 102, 0.1);
+  color: #25D366;
+}
+
+.error {
+  background: rgba(255, 101, 132, 0.1);
+  color: var(--accent-2);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .section { padding: 2rem 0 4rem; }
+  .container { padding: 0 1rem; }
+  .card { padding: 2rem 1.5rem; }
+  .title { font-size: 1.5rem; }
+  .subtitle { font-size: 1rem; margin-bottom: 2rem; }
+}

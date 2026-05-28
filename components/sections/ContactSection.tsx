@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
+import styles from "./ContactSection.module.css";
+import { Send } from "lucide-react";
+
+export default function ContactSection() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ text: "", type: "" });
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus({ text: "", type: "" });
+
+    const { error } = await supabase.from("contacts").insert([{ name, email, message }]);
+
+    if (error) {
+      setStatus({ text: "حدث خطأ أثناء إرسال الرسالة، حاول مرة أخرى.", type: "error" });
+    } else {
+      setStatus({ text: "تم إرسال رسالتك بنجاح! شكراً لتواصلك.", type: "success" });
+      setName("");
+      setEmail("");
+      setMessage("");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <section className={styles.section} id="contact">
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <h2 className={styles.title}>تواصل معي</h2>
+          <p className={styles.subtitle}>يسعدني دائماً سماع رأيك أو الإجابة على استفساراتك.</p>
+          
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {status.text && (
+              <div className={`${styles.statusMessage} ${styles[status.type]}`}>
+                {status.text}
+              </div>
+            )}
+            <div className={styles.inputGroup}>
+              <label>الاسم</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="أدخل اسمك" />
+            </div>
+            <div className={styles.inputGroup}>
+              <label>البريد الإلكتروني</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="أدخل بريدك الإلكتروني" dir="ltr" />
+            </div>
+            <div className={styles.inputGroup}>
+              <label>الرسالة</label>
+              <textarea value={message} onChange={e => setMessage(e.target.value)} required rows={5} placeholder="كيف يمكنني مساعدتك؟"></textarea>
+            </div>
+            <button type="submit" disabled={loading} className={styles.submitBtn}>
+              {loading ? "جاري الإرسال..." : (
+                <>
+                  <Send size={18} />
+                  إرسال الرسالة
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}

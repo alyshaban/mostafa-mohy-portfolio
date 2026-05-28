@@ -4,6 +4,8 @@ export type Profile = {
   bio: string;
   avatar_url: string;
   cover_url: string;
+  avatar_storage_path: string | null;
+  cover_storage_path: string | null;
   followers_count: number;
   views_count: number;
   likes_count: number;
@@ -27,6 +29,7 @@ export type Post = {
   title: string;
   description: string;
   cover_image: string;
+  cover_storage_path: string | null;
   facebook_url: string;
   category: string;
   is_published: boolean;
@@ -36,6 +39,7 @@ export type Post = {
 export type GalleryImage = {
   id: string;
   image_url: string;
+  image_storage_path: string | null;
   caption: string;
   category: string;
   display_order: number;
@@ -56,6 +60,7 @@ export type Sponsorship = {
   title: string;
   description: string | null;
   image_url: string | null;
+  image_storage_path: string | null;
   video_url: string | null;
   display_order: number;
   is_published: boolean;

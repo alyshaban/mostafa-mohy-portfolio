@@ -8,6 +8,8 @@ import styles from "./AdminForms.module.css";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
+import ImageInput from "./ImageInput";
+import { removeStorageImage } from "@/lib/storage";
 
 export default function GalleryManager({ initialImages }: { initialImages: GalleryImage[] }) {
   const [images, setImages] = useState<GalleryImage[]>(initialImages);
@@ -16,6 +18,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
   const { confirm } = useDialog();
   
   const [imageUrl, setImageUrl] = useState("");
+  const [imageStoragePath, setImageStoragePath] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
   const [displayOrder, setDisplayOrder] = useState(0);
 
@@ -25,6 +28,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
   );
 
   const handleDelete = async (id: string) => {
+    const image = images.find((img) => img.id === id);
     const confirmed = await confirm({
       title: "حذف الصورة؟",
       description: "سيتم حذف الصورة من المعرض ولا يمكن التراجع عن هذه العملية.",
@@ -38,7 +42,12 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
       showToast({ title: "تعذر حذف الصورة", description: error.message, type: "error" });
     } else {
       setImages(images.filter(img => img.id !== id));
-      showToast({ title: "تم حذف الصورة", type: "success" });
+      const storageError = await removeStorageImage(supabase, image?.image_storage_path);
+      showToast({
+        title: storageError ? "تم حذف الصورة من المعرض" : "تم حذف الصورة",
+        description: storageError ? "لكن تعذر حذف الملف من Storage." : undefined,
+        type: storageError ? "warning" : "success",
+      });
     }
     setLoading(false);
   };
@@ -50,7 +59,13 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
     try {
       const { data, error } = await supabase
         .from("gallery")
-        .insert([{ image_url: imageUrl, caption, display_order: displayOrder, category: "general" }])
+        .insert([{
+          image_url: imageUrl,
+          image_storage_path: imageStoragePath,
+          caption,
+          display_order: displayOrder,
+          category: "general",
+        }])
         .select()
         .single();
 
@@ -58,6 +73,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
       setImages([...images, data].sort((a,b) => a.display_order - b.display_order));
       showToast({ title: "تمت إضافة الصورة", type: "success" });
       setImageUrl("");
+      setImageStoragePath(null);
       setCaption("");
       setDisplayOrder(images.length + 1);
     } catch (err) {
@@ -72,16 +88,16 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
       <form onSubmit={handleSubmit} className={styles.form} style={{ marginBottom: "3rem" }}>
         <h3>إضافة صورة جديدة</h3>
         
-        <div className={styles.inputGroup}>
-          <label>رابط الصورة (Image URL)</label>
-          <input 
-            type="url" 
-            value={imageUrl} 
-            onChange={(e) => setImageUrl(e.target.value)} 
-            required 
-            dir="ltr"
-          />
-        </div>
+        <ImageInput
+          label="الصورة"
+          value={imageUrl}
+          storagePath={imageStoragePath}
+          folder="gallery"
+          onChange={({ url, storagePath }) => {
+            setImageUrl(url);
+            setImageStoragePath(storagePath || null);
+          }}
+        />
 
         <div className={styles.inputGroup}>
           <label>الوصف (Caption)</label>

@@ -5,13 +5,17 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Profile } from "@/types";
 import styles from "./AdminForms.module.css";
 import { useToast } from "@/components/ui/ToastProvider";
+import ImageInput from "./ImageInput";
+import { removeStorageImage } from "@/lib/storage";
 
 export default function ProfileForm({ initialProfile }: { initialProfile: Profile | null }) {
   const [profile, setProfile] = useState<Partial<Profile>>(initialProfile || {
     name: "",
     bio: "",
     avatar_url: "",
+    avatar_storage_path: null,
     cover_url: "",
+    cover_storage_path: null,
     ads_description: "",
     ads_contact_url: "",
   });
@@ -35,7 +39,9 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
             name: profile.name,
             bio: profile.bio,
             avatar_url: profile.avatar_url,
+            avatar_storage_path: profile.avatar_storage_path,
             cover_url: profile.cover_url,
+            cover_storage_path: profile.cover_storage_path,
             ads_description: profile.ads_description,
             ads_contact_url: profile.ads_contact_url,
             updated_at: new Date().toISOString(),
@@ -43,6 +49,18 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
           .eq("id", initialProfile.id);
 
         if (error) throw error;
+        if (
+          initialProfile.avatar_storage_path &&
+          initialProfile.avatar_storage_path !== profile.avatar_storage_path
+        ) {
+          await removeStorageImage(supabase, initialProfile.avatar_storage_path);
+        }
+        if (
+          initialProfile.cover_storage_path &&
+          initialProfile.cover_storage_path !== profile.cover_storage_path
+        ) {
+          await removeStorageImage(supabase, initialProfile.cover_storage_path);
+        }
         showToast({ title: "تم تحديث الملف الشخصي", type: "success" });
       } else {
         const { error } = await supabase
@@ -52,7 +70,9 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
               name: profile.name,
               bio: profile.bio,
               avatar_url: profile.avatar_url,
+              avatar_storage_path: profile.avatar_storage_path,
               cover_url: profile.cover_url,
+              cover_storage_path: profile.cover_storage_path,
               ads_description: profile.ads_description,
               ads_contact_url: profile.ads_contact_url,
             }
@@ -93,25 +113,33 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
         />
       </div>
 
-      <div className={styles.inputGroup}>
-        <label>رابط الصورة الشخصية (Avatar URL)</label>
-        <input 
-          type="url" 
-          value={profile.avatar_url || ""} 
-          onChange={(e) => setProfile({...profile, avatar_url: e.target.value})}
-          dir="ltr"
-        />
-      </div>
+      <ImageInput
+        label="الصورة الشخصية"
+        value={profile.avatar_url || ""}
+        storagePath={profile.avatar_storage_path}
+        folder="profile"
+        onChange={({ url, storagePath }) =>
+          setProfile({
+            ...profile,
+            avatar_url: url,
+            avatar_storage_path: storagePath || null,
+          })
+        }
+      />
 
-      <div className={styles.inputGroup}>
-        <label>رابط صورة الغلاف (Cover URL)</label>
-        <input 
-          type="url" 
-          value={profile.cover_url || ""} 
-          onChange={(e) => setProfile({...profile, cover_url: e.target.value})}
-          dir="ltr"
-        />
-      </div>
+      <ImageInput
+        label="صورة الغلاف"
+        value={profile.cover_url || ""}
+        storagePath={profile.cover_storage_path}
+        folder="profile"
+        onChange={({ url, storagePath }) =>
+          setProfile({
+            ...profile,
+            cover_url: url,
+            cover_storage_path: storagePath || null,
+          })
+        }
+      />
 
       <h3 style={{marginTop: "2rem", marginBottom: "1rem", color: "var(--text-primary)"}}>إعدادات الإعلانات</h3>
       

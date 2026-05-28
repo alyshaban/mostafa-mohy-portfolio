@@ -8,6 +8,8 @@ import styles from "./AdminForms.module.css";
 import { Pencil, Trash2, Plus, GripVertical } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
+import ImageInput from "./ImageInput";
+import { removeStorageImage } from "@/lib/storage";
 
 export default function SponsorshipsManager({
   initialSponsorships,
@@ -23,6 +25,7 @@ export default function SponsorshipsManager({
     title: "",
     description: "",
     image_url: "",
+    image_storage_path: null,
     video_url: "",
     display_order: 0,
     is_published: true,
@@ -42,6 +45,7 @@ export default function SponsorshipsManager({
 
     try {
       if (currentSponsorship.id) {
+        const previous = sponsorships.find((s) => s.id === currentSponsorship.id);
         const { error } = await supabase
           .from("sponsorships")
           .update(currentSponsorship)
@@ -55,6 +59,12 @@ export default function SponsorshipsManager({
               : s,
           ),
         );
+        if (
+          previous?.image_storage_path &&
+          previous.image_storage_path !== currentSponsorship.image_storage_path
+        ) {
+          await removeStorageImage(supabase, previous.image_storage_path);
+        }
         showToast({ title: "تم تعديل الإعلان", type: "success" });
       } else {
         const newOrder =
@@ -86,6 +96,7 @@ export default function SponsorshipsManager({
   };
 
   const handleDelete = async (id: string) => {
+    const sponsorship = sponsorships.find((s) => s.id === id);
     const confirmed = await confirm({
       title: "حذف الإعلان؟",
       description: "سيتم حذف الإعلان أو الرعاية من لوحة التحكم والموقع.",
@@ -101,7 +112,15 @@ export default function SponsorshipsManager({
         .eq("id", id);
       if (error) throw error;
       setSponsorships((prev) => prev.filter((s) => s.id !== id));
-      showToast({ title: "تم حذف الإعلان", type: "success" });
+      const storageError = await removeStorageImage(
+        supabase,
+        sponsorship?.image_storage_path,
+      );
+      showToast({
+        title: "تم حذف الإعلان",
+        description: storageError ? "لكن تعذر حذف ملف الصورة من Storage." : undefined,
+        type: storageError ? "warning" : "success",
+      });
     } catch (error) {
       console.error(error);
       showToast({
@@ -143,6 +162,7 @@ export default function SponsorshipsManager({
       title: "",
       description: "",
       image_url: "",
+      image_storage_path: null,
       video_url: "",
       display_order: sponsorships.length,
       is_published: true,
@@ -357,40 +377,19 @@ export default function SponsorshipsManager({
             />
           </div>
 
-          <div className={styles.inputGroup}>
-            <label>رابط الصورة / اللوجو (URL)</label>
-            <input
-              type="url"
-              value={currentSponsorship.image_url || ""}
-              onChange={(e) =>
-                setCurrentSponsorship({
-                  ...currentSponsorship,
-                  image_url: e.target.value,
-                })
-              }
-              dir="ltr"
-            />
-            {currentSponsorship.image_url && (
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "200px",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  marginTop: "1rem",
-                }}
-              >
-                <Image
-                  src={currentSponsorship.image_url}
-                  alt="Preview"
-                  fill
-                  style={{ objectFit: "cover" }}
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
-              </div>
-            )}
-          </div>
+          <ImageInput
+            label="الصورة / اللوجو"
+            value={currentSponsorship.image_url || ""}
+            storagePath={currentSponsorship.image_storage_path}
+            folder="sponsorships"
+            onChange={({ url, storagePath }) =>
+              setCurrentSponsorship({
+                ...currentSponsorship,
+                image_url: url,
+                image_storage_path: storagePath || null,
+              })
+            }
+          />
 
           <div className={styles.inputGroup}>
             <label>رابط فيديو الإعلان على المنصة</label>

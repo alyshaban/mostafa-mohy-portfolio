@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Post } from "@/types";
 import styles from "./AdminForms.module.css";
 import { useToast } from "@/components/ui/ToastProvider";
+import ImageInput from "./ImageInput";
+import { removeStorageImage } from "@/lib/storage";
 
 export default function PostForm({ initialPost }: { initialPost?: Post }) {
   const [post, setPost] = useState<Partial<Post>>(
@@ -13,6 +15,7 @@ export default function PostForm({ initialPost }: { initialPost?: Post }) {
       title: "",
       description: "",
       cover_image: "",
+      cover_storage_path: null,
       facebook_url: "",
       category: "general",
       is_published: true,
@@ -39,6 +42,12 @@ export default function PostForm({ initialPost }: { initialPost?: Post }) {
           .update(post)
           .eq("id", initialPost.id);
         if (error) throw error;
+        if (
+          initialPost.cover_storage_path &&
+          initialPost.cover_storage_path !== post.cover_storage_path
+        ) {
+          await removeStorageImage(supabase, initialPost.cover_storage_path);
+        }
         showToast({ title: "تم تعديل البوست", type: "success" });
       } else {
         const { error } = await supabase.from("posts").insert([post]);
@@ -76,15 +85,19 @@ export default function PostForm({ initialPost }: { initialPost?: Post }) {
         />
       </div>
 
-      <div className={styles.inputGroup}>
-        <label>رابط الصورة (Cover Image URL)</label>
-        <input
-          type="url"
-          value={post.cover_image || ""}
-          onChange={(e) => setPost({ ...post, cover_image: e.target.value })}
-          dir="ltr"
-        />
-      </div>
+      <ImageInput
+        label="صورة الغلاف"
+        value={post.cover_image || ""}
+        storagePath={post.cover_storage_path}
+        folder="posts"
+        onChange={({ url, storagePath }) =>
+          setPost({
+            ...post,
+            cover_image: url,
+            cover_storage_path: storagePath || null,
+          })
+        }
+      />
 
       <div className={styles.inputGroup}>
         <label>رابط البوست على المنصة</label>

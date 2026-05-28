@@ -9,6 +9,7 @@ import Link from "next/link";
 import styles from "./PostsList.module.css";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
+import { removeStorageImage } from "@/lib/storage";
 
 export default function PostsList({ initialPosts }: { initialPosts: Post[] }) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -21,6 +22,7 @@ export default function PostsList({ initialPosts }: { initialPosts: Post[] }) {
   );
 
   const handleDelete = async (id: string) => {
+    const post = posts.find((item) => item.id === id);
     const confirmed = await confirm({
       title: "حذف البوست؟",
       description: "سيتم حذف البوست من لوحة التحكم ولن يظهر في الموقع.",
@@ -33,7 +35,12 @@ export default function PostsList({ initialPosts }: { initialPosts: Post[] }) {
       showToast({ title: "تعذر حذف البوست", description: error.message, type: "error" });
     } else {
       setPosts(posts.filter(p => p.id !== id));
-      showToast({ title: "تم حذف البوست", type: "success" });
+      const storageError = await removeStorageImage(supabase, post?.cover_storage_path);
+      showToast({
+        title: "تم حذف البوست",
+        description: storageError ? "لكن تعذر حذف صورة الغلاف من Storage." : undefined,
+        type: storageError ? "warning" : "success",
+      });
     }
   };
 

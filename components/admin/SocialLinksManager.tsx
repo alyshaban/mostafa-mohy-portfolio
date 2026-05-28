@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { SocialLink } from "@/types";
 import styles from "./AdminForms.module.css";
+import listStyles from "./SocialLinksManager.module.css";
 import { Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
@@ -120,7 +121,7 @@ export default function SocialLinksManager({ initialLinks }: { initialLinks: Soc
   };
 
   return (
-    <div>
+    <div className={listStyles.wrapper}>
       <form onSubmit={handleSubmit} className={styles.form} style={{ marginBottom: "3rem" }}>
         <h3>{editingId ? "تعديل رابط" : "إضافة رابط جديد"}</h3>
         
@@ -174,21 +175,21 @@ export default function SocialLinksManager({ initialLinks }: { initialLinks: Soc
         </div>
       </form>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className={listStyles.list}>
         {links.map(link => (
-          <div key={link.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.5rem", background: "var(--bg-card)", border: `1px solid var(--border)`, borderRadius: "12px" }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-                <strong style={{ fontSize: "1.2rem", textTransform: "capitalize", color: "var(--text-primary)" }}>{link.platform}</strong>
-                {!link.is_visible && <span style={{ fontSize: "0.8rem", background: "var(--accent-2)", color: "white", padding: "2px 8px", borderRadius: "4px" }}>مخفي</span>}
+          <div key={link.id} className={listStyles.item}>
+            <div className={listStyles.content}>
+              <div className={listStyles.platformRow}>
+                <strong className={listStyles.platform}>{link.platform}</strong>
+                {!link.is_visible && <span className={listStyles.hiddenBadge}>مخفي</span>}
               </div>
-              <a href={link.url} target="_blank" rel="noreferrer" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }} dir="ltr">{link.url}</a>
+              <a href={link.url} target="_blank" rel="noreferrer" className={listStyles.url}>{link.url}</a>
             </div>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button onClick={() => handleEdit(link)} style={{ padding: "0.5rem", background: "rgba(108, 99, 255, 0.1)", color: "var(--accent)", borderRadius: "8px", border: "none", cursor: "pointer" }}>
+            <div className={listStyles.actions}>
+              <button onClick={() => handleEdit(link)} className={`${listStyles.iconBtn} ${listStyles.edit}`}>
                 <Edit2 size={18} />
               </button>
-              <button onClick={() => handleDelete(link.id)} style={{ padding: "0.5rem", background: "rgba(255, 101, 132, 0.1)", color: "var(--accent-2)", borderRadius: "8px", border: "none", cursor: "pointer" }}>
+              <button onClick={() => handleDelete(link.id)} className={`${listStyles.iconBtn} ${listStyles.delete}`}>
                 <Trash2 size={18} />
               </button>
             </div>

@@ -5,6 +5,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { UploadCloud } from "lucide-react";
 import { IMAGE_BUCKET } from "@/lib/storage";
 import { useToast } from "@/components/ui/ToastProvider";
+import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
 import styles from "./ImageInput.module.css";
 
 type ImageValue = {
@@ -169,6 +170,12 @@ export default function ImageInput({
         <div className={styles.preview}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt="" />
+          <ViewableImageButton
+            src={value}
+            alt={label}
+            title={label}
+            className={styles.previewButton}
+          />
         </div>
       )}
     </div>

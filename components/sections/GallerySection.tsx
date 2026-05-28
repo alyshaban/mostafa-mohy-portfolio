@@ -4,11 +4,11 @@ import { GalleryImage } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./GallerySection.module.css";
-import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { useImageViewer } from "@/components/ui/ImageViewerProvider";
 
 export default function GallerySection({ images, preview = false }: { images: GalleryImage[], preview?: boolean }) {
-  const [selectedImg, setSelectedImg] = useState<string | null>(null);
+  const { openImage } = useImageViewer();
   const displayImages = preview ? images.slice(0, 6) : images;
 
   if (images.length === 0) return (
@@ -26,7 +26,12 @@ export default function GallerySection({ images, preview = false }: { images: Ga
         <h2 className={styles.title}>معرض الصور</h2>
         <div className={styles.grid}>
           {displayImages.map(img => (
-            <div key={img.id} className={styles.imgWrapper} onClick={() => setSelectedImg(img.image_url)}>
+            <button
+              key={img.id}
+              type="button"
+              className={styles.imgWrapper}
+              onClick={() => openImage({ src: img.image_url, alt: img.caption || "صورة من المعرض", title: img.caption })}
+            >
               <Image 
                 src={img.image_url} 
                 alt={img.caption || "صورة من المعرض"} 
@@ -37,7 +42,7 @@ export default function GallerySection({ images, preview = false }: { images: Ga
               <div className={styles.captionOverlay}>
                 <p>{img.caption}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
         {preview && images.length > 6 && (
@@ -50,20 +55,6 @@ export default function GallerySection({ images, preview = false }: { images: Ga
         )}
       </div>
 
-      {selectedImg && (
-        <div className={styles.lightbox} onClick={() => setSelectedImg(null)}>
-          <button className={styles.closeBtn} onClick={() => setSelectedImg(null)}>&times;</button>
-          <div style={{ position: "relative", width: "90vw", height: "90vh" }}>
-            <Image 
-              src={selectedImg} 
-              alt="Enlarged" 
-              fill
-              style={{ objectFit: "contain" }}
-              className={styles.lightboxImg} 
-            />
-          </div>
-        </div>
-      )}
     </section>
   );
 }

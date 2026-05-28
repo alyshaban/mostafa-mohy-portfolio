@@ -5,11 +5,12 @@ import { createBrowserClient } from "@supabase/ssr";
 import { GalleryImage } from "@/types";
 import Image from "next/image";
 import styles from "./AdminForms.module.css";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
 import ImageInput from "./ImageInput";
 import { removeStorageImage } from "@/lib/storage";
+import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
 
 export default function GalleryManager({ initialImages }: { initialImages: GalleryImage[] }) {
   const [images, setImages] = useState<GalleryImage[]>(initialImages);
@@ -17,6 +18,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
   const { showToast } = useToast();
   const { confirm } = useDialog();
   
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState("");
   const [imageStoragePath, setImageStoragePath] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
@@ -26,6 +28,23 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  const resetForm = () => {
+    setEditingId(null);
+    setImageUrl("");
+    setImageStoragePath(null);
+    setCaption("");
+    setDisplayOrder(images.length + 1);
+  };
+
+  const startEdit = (image: GalleryImage) => {
+    setEditingId(image.id);
+    setImageUrl(image.image_url);
+    setImageStoragePath(image.image_storage_path || null);
+    setCaption(image.caption || "");
+    setDisplayOrder(image.display_order);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleDelete = async (id: string) => {
     const image = images.find((img) => img.id === id);
@@ -57,36 +76,61 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
-        .from("gallery")
-        .insert([{
-          image_url: imageUrl,
-          image_storage_path: imageStoragePath,
-          caption,
-          display_order: displayOrder,
-          category: "general",
-        }])
-        .select()
-        .single();
+      if (editingId) {
+        const previous = images.find((img) => img.id === editingId);
+        const { data, error } = await supabase
+          .from("gallery")
+          .update({
+            image_url: imageUrl,
+            image_storage_path: imageStoragePath,
+            caption,
+            display_order: displayOrder,
+          })
+          .eq("id", editingId)
+          .select()
+          .single();
 
-      if (error) throw error;
-      setImages([...images, data].sort((a,b) => a.display_order - b.display_order));
-      showToast({ title: "تمت إضافة الصورة", type: "success" });
-      setImageUrl("");
-      setImageStoragePath(null);
-      setCaption("");
-      setDisplayOrder(images.length + 1);
+        if (error) throw error;
+        setImages(images.map((img) => img.id === editingId ? data : img).sort((a, b) => a.display_order - b.display_order));
+        if (
+          previous?.image_storage_path &&
+          previous.image_storage_path !== imageStoragePath
+        ) {
+          await removeStorageImage(supabase, previous.image_storage_path);
+        }
+        showToast({ title: "?? ????? ??????", type: "success" });
+      } else {
+        const { data, error } = await supabase
+          .from("gallery")
+          .insert([{
+            image_url: imageUrl,
+            image_storage_path: imageStoragePath,
+            caption,
+            display_order: displayOrder,
+            category: "general",
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        setImages([...images, data].sort((a, b) => a.display_order - b.display_order));
+        showToast({ title: "??? ????? ??????", type: "success" });
+      }
+      resetForm();
     } catch (err) {
-      showToast({ title: "تعذر إضافة الصورة", description: (err as Error).message, type: "error" });
+      showToast({
+        title: editingId ? "???? ????? ??????" : "???? ????? ??????",
+        description: (err as Error).message,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div>
       <form onSubmit={handleSubmit} className={styles.form} style={{ marginBottom: "3rem" }}>
-        <h3>إضافة صورة جديدة</h3>
+        <h3>{editingId ? "تعديل صورة" : "إضافة صورة جديدة"}</h3>
         
         <ImageInput
           label="الصورة"
@@ -117,9 +161,16 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
           />
         </div>
 
-        <button type="submit" disabled={loading} className={styles.submitBtn}>
-          {loading ? "جاري الإضافة..." : "إضافة الصورة"}
-        </button>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <button type="submit" disabled={loading} className={styles.submitBtn} style={{ flex: 1 }}>
+            {loading ? "جاري الحفظ..." : editingId ? "حفظ التعديل" : "إضافة الصورة"}
+          </button>
+          {editingId && (
+            <button type="button" onClick={resetForm} className={styles.submitBtn} style={{ flex: 1, backgroundColor: "var(--bg-secondary)", color: "var(--text-primary)" }}>
+              إلغاء
+            </button>
+          )}
+        </div>
       </form>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1.5rem" }}>
@@ -127,14 +178,25 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
           <div key={img.id} style={{ background: "var(--bg-card)", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--border)" }}>
             <div style={{ position: "relative", width: "100%", height: "200px" }}>
               <Image src={img.image_url} alt={img.caption || "صورة"} fill style={{ objectFit: "cover" }} />
+              <ViewableImageButton
+                src={img.image_url}
+                alt={img.caption || "صورة"}
+                title={img.caption || "صورة"}
+                className={styles.imageViewButton}
+              />
             </div>
             <div style={{ padding: "1rem" }}>
               <p style={{ color: "var(--text-primary)", marginBottom: "0.5rem", fontWeight: "500" }}>{img.caption || "بدون وصف"}</p>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>ترتيب: {img.display_order}</span>
-                <button onClick={() => handleDelete(img.id)} style={{ padding: "0.5rem", background: "rgba(255, 101, 132, 0.1)", color: "var(--accent-2)", borderRadius: "8px", border: "none", cursor: "pointer" }}>
-                  <Trash2 size={16} />
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button onClick={() => startEdit(img)} className={styles.iconBtn}>
+                    <Pencil size={16} />
+                  </button>
+                  <button onClick={() => handleDelete(img.id)} className={`${styles.iconBtn} ${styles.danger}`}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

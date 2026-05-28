@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { DialogProvider } from "@/components/ui/DialogProvider";
+import { ImageViewerProvider } from "@/components/ui/ImageViewerProvider";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -27,9 +28,11 @@ export default function RootLayout({
       <body className={cairo.variable}>
         <ToastProvider>
           <DialogProvider>
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
+            <ImageViewerProvider>
+              <Navbar />
+              <main>{children}</main>
+              <Footer />
+            </ImageViewerProvider>
           </DialogProvider>
         </ToastProvider>
       </body>

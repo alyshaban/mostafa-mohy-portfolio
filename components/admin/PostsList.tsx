@@ -10,6 +10,7 @@ import styles from "./PostsList.module.css";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
 import { removeStorageImage } from "@/lib/storage";
+import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
 
 export default function PostsList({ initialPosts }: { initialPosts: Post[] }) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -50,6 +51,12 @@ export default function PostsList({ initialPosts }: { initialPosts: Post[] }) {
         <div key={post.id} className={styles.item}>
           <div className={styles.imageWrap}>
             <Image src={post.cover_image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=400&auto=format&fit=crop"} alt={post.title} fill style={{ objectFit: "cover" }} />
+            <ViewableImageButton
+              src={post.cover_image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=400&auto=format&fit=crop"}
+              alt={post.title}
+              title={post.title}
+              className={styles.viewButton}
+            />
           </div>
           
           <div className={styles.content}>

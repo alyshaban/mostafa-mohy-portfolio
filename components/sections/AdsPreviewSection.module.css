@@ -92,6 +92,13 @@
   transition: transform 0.5s ease;
 }
 
+.viewImageBtn {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 2;
+}
+
 .card:hover .image {
   transform: scale(1.08);
 }

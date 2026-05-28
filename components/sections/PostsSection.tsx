@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import { Post } from "@/types";
 import Link from "next/link";
 import styles from "./PostsSection.module.css";
 import { Play, ArrowLeft } from "lucide-react";
+import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
 
 export default function PostsSection({ posts, preview = false }: { posts: Post[], preview?: boolean }) {
   const publishedPosts = posts.filter(p => p.is_published);
@@ -35,6 +38,14 @@ export default function PostsSection({ posts, preview = false }: { posts: Post[]
                 <div className={styles.playOverlay}>
                   <Play size={40} fill="white" />
                 </div>
+                <span onClick={(event) => event.preventDefault()}>
+                  <ViewableImageButton
+                    src={post.cover_image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=2000&auto=format&fit=crop"}
+                    alt={post.title}
+                    title={post.title}
+                    className={styles.viewImageBtn}
+                  />
+                </span>
               </div>
               <div className={styles.content}>
                 <h3 className={styles.postTitle}>{post.title}</h3>

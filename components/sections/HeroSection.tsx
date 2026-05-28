@@ -1,9 +1,13 @@
+"use client";
+
 import Image from "next/image";
 import { Profile } from "@/types";
 import styles from "./HeroSection.module.css";
 import { Users, Eye, Heart, Video } from "lucide-react";
+import { useImageViewer } from "@/components/ui/ImageViewerProvider";
 
 export default function HeroSection({ profile }: { profile: Profile | null }) {
+  const { openImage } = useImageViewer();
   const p = profile || {
     name: "مصطفى محي",
     bio: "أهلاً بك في موقعي الشخصي",
@@ -14,30 +18,42 @@ export default function HeroSection({ profile }: { profile: Profile | null }) {
     likes_count: 0,
     videos_count: 0
   };
+  const coverUrl = p.cover_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop";
+  const avatarUrl = p.avatar_url || "https://ui-avatars.com/api/?name=Mostafa+Mohy&size=200&background=6c63ff&color=fff";
 
   return (
     <section className={styles.hero}>
-      <div className={styles.coverWrapper}>
+      <button
+        type="button"
+        className={styles.coverWrapper}
+        onClick={() => openImage({ src: coverUrl, alt: "Cover", title: p.name })}
+      >
         <Image 
-          src={p.cover_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"} 
+          src={coverUrl} 
           alt="Cover" 
           fill
           priority
           className={styles.cover} 
         />
         <div className={styles.overlay}></div>
-      </div>
+      </button>
       
       <div className={styles.container}>
         <div className={styles.profileBox}>
-          <Image 
-            src={p.avatar_url || "https://ui-avatars.com/api/?name=Mostafa+Mohy&size=200&background=6c63ff&color=fff"} 
-            alt={p.name} 
-            width={150}
-            height={150}
-            priority
-            className={styles.avatar} 
-          />
+          <button
+            type="button"
+            className={styles.avatarButton}
+            onClick={() => openImage({ src: avatarUrl, alt: p.name, title: p.name })}
+          >
+            <Image 
+              src={avatarUrl} 
+              alt={p.name} 
+              width={150}
+              height={150}
+              priority
+              className={styles.avatar} 
+            />
+          </button>
           <h1 className={styles.name}>{p.name}</h1>
           <p className={styles.bio}>{p.bio}</p>
 

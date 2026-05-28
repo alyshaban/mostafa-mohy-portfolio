@@ -1,8 +1,11 @@
+"use client";
+
 import { Sponsorship } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./AdsPreviewSection.module.css";
 import { Play, ArrowLeft, Megaphone } from "lucide-react";
+import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
 
 export default function AdsPreviewSection({ sponsorships }: { sponsorships: Sponsorship[] }) {
   const published = sponsorships.filter(s => s.is_published).slice(0, 4);
@@ -26,6 +29,7 @@ export default function AdsPreviewSection({ sponsorships }: { sponsorships: Spon
               <div key={s.id} className={styles.card}>
                 <div className={styles.imageWrapper}>
                   {s.image_url ? (
+                    <>
                     <Image 
                       src={s.image_url} 
                       alt={s.title || "إعلان"} 
@@ -33,6 +37,13 @@ export default function AdsPreviewSection({ sponsorships }: { sponsorships: Spon
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className={styles.image} 
                     />
+                    <ViewableImageButton
+                      src={s.image_url}
+                      alt={s.title || "إعلان"}
+                      title={s.title || "إعلان"}
+                      className={styles.viewImageBtn}
+                    />
+                    </>
                   ) : (
                     <div className={styles.placeholder}>
                       <Megaphone size={40} />

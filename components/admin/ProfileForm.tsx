@@ -16,6 +16,10 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
     avatar_storage_path: null,
     cover_url: "",
     cover_storage_path: null,
+    followers_count: 0,
+    views_count: 0,
+    likes_count: 0,
+    videos_count: 0,
     ads_description: "",
     ads_contact_url: "",
   });
@@ -42,6 +46,10 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
             avatar_storage_path: profile.avatar_storage_path,
             cover_url: profile.cover_url,
             cover_storage_path: profile.cover_storage_path,
+            followers_count: profile.followers_count,
+            views_count: profile.views_count,
+            likes_count: profile.likes_count,
+            videos_count: profile.videos_count,
             ads_description: profile.ads_description,
             ads_contact_url: profile.ads_contact_url,
             updated_at: new Date().toISOString(),
@@ -73,6 +81,10 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
               avatar_storage_path: profile.avatar_storage_path,
               cover_url: profile.cover_url,
               cover_storage_path: profile.cover_storage_path,
+              followers_count: profile.followers_count,
+              views_count: profile.views_count,
+              likes_count: profile.likes_count,
+              videos_count: profile.videos_count,
               ads_description: profile.ads_description,
               ads_contact_url: profile.ads_contact_url,
             }
@@ -140,6 +152,50 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
           })
         }
       />
+
+      <h3 style={{marginTop: "2rem", marginBottom: "1rem", color: "var(--text-primary)"}}>إحصائيات الهيرو</h3>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem" }}>
+        <div className={styles.inputGroup}>
+          <label>عدد المتابعين</label>
+          <input
+            type="number"
+            min={0}
+            value={profile.followers_count ?? 0}
+            onChange={(e) => setProfile({ ...profile, followers_count: Number(e.target.value) })}
+          />
+        </div>
+
+        <div className={styles.inputGroup}>
+          <label>عدد المشاهدات</label>
+          <input
+            type="number"
+            min={0}
+            value={profile.views_count ?? 0}
+            onChange={(e) => setProfile({ ...profile, views_count: Number(e.target.value) })}
+          />
+        </div>
+
+        <div className={styles.inputGroup}>
+          <label>عدد الإعجابات</label>
+          <input
+            type="number"
+            min={0}
+            value={profile.likes_count ?? 0}
+            onChange={(e) => setProfile({ ...profile, likes_count: Number(e.target.value) })}
+          />
+        </div>
+
+        <div className={styles.inputGroup}>
+          <label>عدد الفيديوهات</label>
+          <input
+            type="number"
+            min={0}
+            value={profile.videos_count ?? 0}
+            onChange={(e) => setProfile({ ...profile, videos_count: Number(e.target.value) })}
+          />
+        </div>
+      </div>
 
       <h3 style={{marginTop: "2rem", marginBottom: "1rem", color: "var(--text-primary)"}}>إعدادات الإعلانات</h3>
       

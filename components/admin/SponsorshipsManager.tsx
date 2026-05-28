@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { useDialog } from "@/components/ui/DialogProvider";
 import ImageInput from "./ImageInput";
 import { removeStorageImage } from "@/lib/storage";
+import { ViewableImageButton } from "@/components/ui/ImageViewerProvider";
 
 export default function SponsorshipsManager({
   initialSponsorships,
@@ -241,6 +242,12 @@ export default function SponsorshipsManager({
                             alt={s.title}
                             fill
                             style={{ objectFit: "cover" }}
+                          />
+                          <ViewableImageButton
+                            src={s.image_url}
+                            alt={s.title}
+                            title={s.title}
+                            className={styles.imageViewButton}
                           />
                         </div>
                       ) : (

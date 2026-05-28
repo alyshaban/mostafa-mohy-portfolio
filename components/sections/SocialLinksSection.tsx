@@ -84,7 +84,10 @@ const TwitchIcon = () => (
 );
 
 const normalizePlatform = (platform: string) =>
-  platform.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  platform
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
 
 const getIcon = (platform: string) => {
   switch (normalizePlatform(platform)) {
@@ -206,7 +209,7 @@ export default function SocialLinksSection({ links }: { links: SocialLink[] }) {
     return (
       <section className={styles.section} id="social">
         <div className={styles.container}>
-          <h2 className={styles.title}>تواصل معي</h2>
+          <h2 className={styles.title}>روابط التواصل</h2>
           <p style={{ color: "var(--text-secondary)", textAlign: "center" }}>
             لم يتم إضافة روابط تواصل بعد. (يمكنك إضافتها من لوحة التحكم)
           </p>
@@ -217,7 +220,7 @@ export default function SocialLinksSection({ links }: { links: SocialLink[] }) {
   return (
     <section className={styles.section} id="social">
       <div className={styles.container}>
-        <h2 className={styles.title}>تواصل معي</h2>
+        <h2 className={styles.title}>روابط التواصل</h2>
         <div className={styles.linksGrid}>
           {visibleLinks.map((link) => {
             const colors = getColors(link.platform);

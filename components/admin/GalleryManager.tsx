@@ -98,7 +98,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
         ) {
           await removeStorageImage(supabase, previous.image_storage_path);
         }
-        showToast({ title: "?? ????? ??????", type: "success" });
+        showToast({ title: "تم تحديث الصورة", type: "success" });
       } else {
         const { data, error } = await supabase
           .from("gallery")
@@ -114,12 +114,12 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
 
         if (error) throw error;
         setImages([...images, data].sort((a, b) => a.display_order - b.display_order));
-        showToast({ title: "??? ????? ??????", type: "success" });
+        showToast({ title: "تمت إضافة الصورة", type: "success" });
       }
       resetForm();
     } catch (err) {
       showToast({
-        title: editingId ? "???? ????? ??????" : "???? ????? ??????",
+        title: editingId ? "تعذر تحديث الصورة" : "تعذر إضافة الصورة",
         description: (err as Error).message,
         type: "error",
       });

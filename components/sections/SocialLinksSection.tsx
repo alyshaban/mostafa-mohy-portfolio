@@ -211,7 +211,7 @@ export default function SocialLinksSection({ links }: { links: SocialLink[] }) {
         <div className={styles.container}>
           <h2 className={styles.title}>روابط التواصل</h2>
           <p style={{ color: "var(--text-secondary)", textAlign: "center" }}>
-            لم يتم إضافة روابط تواصل بعد. (يمكنك إضافتها من لوحة التحكم)
+            لم يتم إضافة روابط تواصل بعد.
           </p>
         </div>
       </section>

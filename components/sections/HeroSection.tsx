@@ -60,23 +60,31 @@ export default function HeroSection({ profile }: { profile: Profile | null }) {
           <div className={styles.stats}>
             <div className={styles.statItem}>
               <Users size={24} className={styles.statIcon} />
-              <span className={styles.statNumber}>{(p.followers_count / 1000).toFixed(1)}K</span>
-              <span className={styles.statLabel}>متابع</span>
+              <div className={styles.statText}>
+                <span className={styles.statNumber}>{(p.followers_count / 1000).toFixed(1)}K</span>
+                <span className={styles.statLabel}>متابع</span>
+              </div>
             </div>
             <div className={styles.statItem}>
               <Eye size={24} className={styles.statIcon} />
-              <span className={styles.statNumber}>{(p.views_count / 1000000).toFixed(1)}M</span>
-              <span className={styles.statLabel}>مشاهدة</span>
+              <div className={styles.statText}>
+                <span className={styles.statNumber}>{(p.views_count / 1000000).toFixed(1)}M</span>
+                <span className={styles.statLabel}>مشاهدة</span>
+              </div>
             </div>
             <div className={styles.statItem}>
               <Heart size={24} className={styles.statIcon} />
-              <span className={styles.statNumber}>{(p.likes_count / 1000).toFixed(1)}K</span>
-              <span className={styles.statLabel}>إعجاب</span>
+              <div className={styles.statText}>
+                <span className={styles.statNumber}>{(p.likes_count / 1000).toFixed(1)}K</span>
+                <span className={styles.statLabel}>إعجاب</span>
+              </div>
             </div>
             <div className={styles.statItem}>
               <Video size={24} className={styles.statIcon} />
-              <span className={styles.statNumber}>{p.videos_count}</span>
-              <span className={styles.statLabel}>فيديو</span>
+              <div className={styles.statText}>
+                <span className={styles.statNumber}>{p.videos_count}</span>
+                <span className={styles.statLabel}>فيديو</span>
+              </div>
             </div>
           </div>
         </div>

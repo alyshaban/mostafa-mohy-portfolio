@@ -1,12 +1,12 @@
 .section {
-  padding: 3rem 0;
+  padding: 2rem 0;
   width: 100%;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
   text-align: center;
 }
 

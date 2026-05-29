@@ -8,7 +8,20 @@ import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
 
+    return () => {
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -46,7 +59,11 @@ export default function Navbar() {
 
         <div className={styles.actions}>
           <ThemeToggle />
-          <button className={styles.mobileMenuBtn} onClick={toggleMenu} aria-label="Toggle Menu">
+          <button
+            className={styles.mobileMenuBtn}
+            onClick={toggleMenu}
+            aria-label="Toggle Menu"
+          >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -55,11 +72,21 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className={styles.mobileMenu}>
-          <Link href="/" onClick={toggleMenu}>الرئيسية</Link>
-          <Link href="/posts" onClick={toggleMenu}>المحتوى</Link>
-          <Link href="/gallery" onClick={toggleMenu}>المعرض</Link>
-          <Link href="/ads" onClick={toggleMenu}>الإعلانات</Link>
-          <Link href="/#contact" onClick={toggleMenu}>راسلني</Link>
+          <Link href="/" onClick={toggleMenu}>
+            الرئيسية
+          </Link>
+          <Link href="/posts" onClick={toggleMenu}>
+            المحتوى
+          </Link>
+          <Link href="/gallery" onClick={toggleMenu}>
+            المعرض
+          </Link>
+          <Link href="/ads" onClick={toggleMenu}>
+            الإعلانات
+          </Link>
+          <Link href="/#contact" onClick={toggleMenu}>
+            راسلني
+          </Link>
         </div>
       )}
     </nav>

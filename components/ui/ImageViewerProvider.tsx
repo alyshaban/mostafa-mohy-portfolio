@@ -22,12 +22,24 @@ const ImageViewerContext = createContext<{
   openImage: (image: ImageViewerInput) => void;
 } | null>(null);
 
-export function ImageViewerProvider({ children }: { children: React.ReactNode }) {
+export function ImageViewerProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [image, setImage] = useState<ImageViewerInput | null>(null);
 
-  const closeImage = useCallback(() => setImage(null), []);
+  const closeImage = useCallback(() => {
+    if (window.history.state?.imageViewer) {
+      window.history.back();
+    } else {
+      setImage(null);
+    }
+  }, []);
   const openImage = useCallback((nextImage: ImageViewerInput) => {
     if (!nextImage.src) return;
+
+    window.history.pushState({ imageViewer: true }, "", window.location.href);
     setImage(nextImage);
   }, []);
 
@@ -37,13 +49,28 @@ export function ImageViewerProvider({ children }: { children: React.ReactNode })
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeImage();
     };
+    const handlePopState = () => {
+      closeImage();
+    };
 
-    document.body.style.overflow = "hidden";
+    const scrollY = window.scrollY;
+
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+
+    window.addEventListener("popstate", handlePopState);
+
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = "";
+      const top = document.body.style.top;
+
+      document.body.style.position = "";
+      document.body.style.top = "";
+
+      window.scrollTo(0, parseInt(top || "0") * -1);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, [closeImage, image]);
 
@@ -54,7 +81,10 @@ export function ImageViewerProvider({ children }: { children: React.ReactNode })
       {children}
       {image && (
         <div className={styles.backdrop} onClick={closeImage}>
-          <div className={styles.viewer} onClick={(event) => event.stopPropagation()}>
+          <div
+            className={styles.viewer}
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               type="button"
               className={styles.close}
